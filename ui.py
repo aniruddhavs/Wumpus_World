@@ -42,7 +42,7 @@ class text_box:
 
     def clear_box(self):
         clear_box_surface = pygame.Surface((self.rect.w, self.rect.h))
-        clear_box_surface.fill((164, 186, 186))
+        clear_box_surface.fill((179, 179, 179))
         screen.blit(clear_box_surface,self.rect)
 
     def update(self):
@@ -58,7 +58,15 @@ class text_box:
         pygame.draw.rect(screen, self.color, self.rect, 2)
 
 class Button:
-    pass
+    def __init__(self,x,y,w,h):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = (255,255,255)
+        self.Start_surf = fontH2.render("Start", True, (0,0,0))
+        self.Start_surf_rect = self.Start_surf.get_rect()
+        self.Start_surf_rect.center = self.rect.center
+    def draw(self,screen):
+        pygame.draw.rect(screen, (127,127,127), self.rect,0,10)
+        screen.blit(self.Start_surf, self.Start_surf_rect)
 
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
@@ -69,8 +77,13 @@ Selectgrid = fontH2.render("Select A Grid:", True,(0,0,0))
 SelectgridRect = Selectgrid.get_rect()
 SelectgridRect.centerx = WelcomeRect.centerx
 SelectgridRect.top = WelcomeRect.bottom
-x_grid_in = text_box(WelcomeRect.left, SelectgridRect.bottom+10, 100, 25)
-y_grid_in = text_box(WelcomeRect.right-100, SelectgridRect.bottom+10, 100, 25)
+XSurf = fontH2.render("X", True, (0,0,0))
+XSurf_Rect = XSurf.get_rect()
+XSurf_Rect.centerx = WelcomeRect.centerx
+XSurf_Rect.top = SelectgridRect.bottom+23
+x_grid_in = text_box(WelcomeRect.left, SelectgridRect.bottom+25, 100, 25)
+y_grid_in = text_box(WelcomeRect.right-100, SelectgridRect.bottom+25, 100, 25)
+start_button = Button(WelcomeRect.centerx-75, height-150,150, 50)
 flag = True
 screen.fill((255,255,255))
 newsurf = pygame.Surface((640,480))
@@ -81,8 +94,10 @@ while True:
         screen.blit(newsurf,(0,0))
         screen.blit(Welcome,WelcomeRect)
         screen.blit(Selectgrid,SelectgridRect)
+        screen.blit(XSurf, XSurf_Rect)
         x_grid_in.draw(screen)
         y_grid_in.draw(screen)
+        start_button.draw(screen)
         flag = False
     pygame.display.flip()
     for event in pygame.event.get(): 
