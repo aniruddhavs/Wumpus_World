@@ -29,17 +29,20 @@ class text_box:
                 if event.key == pygame.K_RETURN:
                     self.text = ''
                 elif event.key == pygame.K_BACKSPACE:
-                    self.text = self.text[:-1]
+                    if len(self.text) <= 1:
+                        self.text =''
+                        self.txt_surface = fontH3.render(self.text, True, self.color)
+                    else:
+                        self.text = self.text[:-1]
                 else:
                     self.text += event.unicode
                 if self.text.isnumeric():
                     self.txt_surface = fontH3.render(self.text, True, self.color)
-                    #self.update()
-                    self.draw(screen)
+                self.draw(screen)
 
     def clear_box(self):
         clear_box_surface = pygame.Surface((self.rect.w, self.rect.h))
-        clear_box_surface.fill((255,255,255))
+        clear_box_surface.fill((164, 186, 186))
         screen.blit(clear_box_surface,self.rect)
 
     def update(self):
@@ -54,6 +57,9 @@ class text_box:
         screen.blit(self.txt_surface, self.txt_surface_rect)
         pygame.draw.rect(screen, self.color, self.rect, 2)
 
+class Button:
+    pass
+
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
 fontH.set_bold(False)
@@ -63,8 +69,8 @@ Selectgrid = fontH2.render("Select A Grid:", True,(0,0,0))
 SelectgridRect = Selectgrid.get_rect()
 SelectgridRect.centerx = WelcomeRect.centerx
 SelectgridRect.top = WelcomeRect.bottom
-x_grid_in = text_box(WelcomeRect.left, SelectgridRect.bottom+5, 100, 100)
-x_grid_rect = pygame.Rect(WelcomeRect.left, SelectgridRect.bottom+5, 100, 100)
+x_grid_in = text_box(WelcomeRect.left, SelectgridRect.bottom+10, 100, 25)
+y_grid_in = text_box(WelcomeRect.right-100, SelectgridRect.bottom+10, 100, 25)
 flag = True
 screen.fill((255,255,255))
 newsurf = pygame.Surface((640,480))
@@ -76,10 +82,12 @@ while True:
         screen.blit(Welcome,WelcomeRect)
         screen.blit(Selectgrid,SelectgridRect)
         x_grid_in.draw(screen)
+        y_grid_in.draw(screen)
         flag = False
     pygame.display.flip()
     for event in pygame.event.get(): 
         x_grid_in.handle_event(event)
+        y_grid_in.handle_event(event)
         if event.type==pygame.QUIT:
             pygame.quit() 
             exit(0) 
