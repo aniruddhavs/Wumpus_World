@@ -7,6 +7,7 @@ pygame.display.set_caption("Wumpus World")
 fontH = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 32)
 fontH2 = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 26)
 fontH3 = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 16)
+fontH4 = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 14)
 
 class text_box:
     def __init__(self, x, y, w, h, text=''):
@@ -35,7 +36,7 @@ class text_box:
                     else:
                         self.text = self.text[:-1]
                 else:
-                    self.text += event.unicode
+                    self.text = event.unicode
                 if self.text.isnumeric():
                     self.txt_surface = fontH3.render(self.text, True, self.color)
                 self.draw(screen)
@@ -44,10 +45,6 @@ class text_box:
         clear_box_surface = pygame.Surface((self.rect.w, self.rect.h))
         clear_box_surface.fill((179, 179, 179))
         screen.blit(clear_box_surface,self.rect)
-
-    def update(self):
-        width = max(200, self.txt_surface.get_width()+10)
-        self.rect.w = width
 
     def draw(self, screen):
         self.clear_box()
@@ -58,15 +55,49 @@ class text_box:
         pygame.draw.rect(screen, self.color, self.rect, 2)
 
 class Button:
-    def __init__(self,x,y,w,h):
+    def __init__(self,x,y,w,h,text):
         self.rect = pygame.Rect(x, y, w, h)
         self.color = (255,255,255)
-        self.Start_surf = fontH2.render("Start", True, (0,0,0))
+        self.Start_surf = fontH2.render(text, True, (25,25,25))
         self.Start_surf_rect = self.Start_surf.get_rect()
         self.Start_surf_rect.center = self.rect.center
     def draw(self,screen):
-        pygame.draw.rect(screen, (127,127,127), self.rect,0,10)
+        self.surf = pygame.Surface((self.rect.w,self.rect.h),pygame.SRCALPHA)
+        self.surf.fill((127,127,127,0))
+        new_rect = pygame.Rect.copy(self.rect)
+        new_rect.x,new_rect.y = 0,0
+        pygame.draw.rect(self.surf, (127,127,127), new_rect,0,10)
+        screen.blit(self.surf, self.rect)
         screen.blit(self.Start_surf, self.Start_surf_rect)
+    def when_clicked(self,event,a,b):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                try:
+                    clear_surf = pygame.Surface((self.error_surf_rect.w,self.error_surf_rect.h))
+                    clear_surf.fill((195,195,195))
+                    screen.blit(clear_surf, self.error_surf_rect)
+                except:
+                    pass
+                if a == '' or b == '':
+                    self.error_surf = fontH4.render("Enter the grid size", True, (0,0,0))
+                    self.error_surf_rect = self.error_surf.get_rect()
+                    self.error_surf_rect.centerx = self.rect.centerx
+                    self.error_surf_rect.bottom = self.rect.top-10
+                    screen.blit(self.error_surf, self.error_surf_rect)
+                    return True
+                elif a > '8' or b > '8' or a < '2' or b < '2':
+                    self.error_surf = fontH4.render("Invalid grid size (Lower Limit=2,Upper Limit=8)", True, (0,0,0))
+                    self.error_surf_rect = self.error_surf.get_rect()
+                    self.error_surf_rect.centerx = self.rect.centerx
+                    self.error_surf_rect.bottom = self.rect.top-10
+                    screen.blit(self.error_surf, self.error_surf_rect)
+                    return True
+                else:
+                    return False
+            else:
+                return True
+        else:
+            return True
 
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
@@ -83,13 +114,13 @@ XSurf_Rect.centerx = WelcomeRect.centerx
 XSurf_Rect.top = SelectgridRect.bottom+23
 x_grid_in = text_box(WelcomeRect.left, SelectgridRect.bottom+25, 100, 25)
 y_grid_in = text_box(WelcomeRect.right-100, SelectgridRect.bottom+25, 100, 25)
-start_button = Button(WelcomeRect.centerx-75, height-150,150, 50)
+start_button = Button(WelcomeRect.centerx-75, height-150,150, 50,"Start")
 flag = True
+grid_setup_flag = True
 screen.fill((255,255,255))
 newsurf = pygame.Surface((640,480))
-newsurf.fill((0,0,0))
-newsurf.set_alpha(50)
-while True:
+newsurf.fill((195,195,195))
+while grid_setup_flag:
     if flag:
         screen.blit(newsurf,(0,0))
         screen.blit(Welcome,WelcomeRect)
@@ -103,6 +134,14 @@ while True:
     for event in pygame.event.get(): 
         x_grid_in.handle_event(event)
         y_grid_in.handle_event(event)
+        grid_setup_flag = start_button.when_clicked(event,x_grid_in.text,y_grid_in.text)
         if event.type==pygame.QUIT:
             pygame.quit() 
             exit(0) 
+while True:
+    screen.fill((255,255,255))
+    pygame.display.flip()
+    for event in pygame.event.get(): 
+        if event.type==pygame.QUIT:
+            pygame.quit() 
+            exit(0)
