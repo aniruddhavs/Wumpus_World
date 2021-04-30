@@ -99,6 +99,26 @@ class Button:
         else:
             return True
 
+class Grid:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+        self.rect = pygame.Rect(0,0,400,400)
+
+    def draw(self,screen,w,h):
+        self.rect.center = (w//2,h//2)
+        clear_grid_surface = pygame.Surface((400,400))
+        clear_grid_surface.fill((0,0,0))
+        screen.blit(clear_grid_surface, self.rect)
+        size_x,size_y = 380//int(self.x),380//int(self.y)
+        print(size_x)
+        print(size_y)
+        square_surface = pygame.Surface((size_x,size_y))
+        square_surface.fill((255,255,255))
+        for i in range(self.rect.left+2,self.rect.left+380,size_x+2):
+            for j in range(self.rect.top+2,self.rect.top+380,size_y+2):
+                screen.blit(square_surface, (i,j))
+
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
 fontH.set_bold(False)
@@ -138,9 +158,11 @@ while grid_setup_flag:
         if event.type==pygame.QUIT:
             pygame.quit() 
             exit(0) 
+grid = Grid(x_grid_in.text,y_grid_in.text)
+screen.fill((255,255,255))
+grid.draw(screen,width,height)
+pygame.display.flip()
 while True:
-    screen.fill((255,255,255))
-    pygame.display.flip()
     for event in pygame.event.get(): 
         if event.type==pygame.QUIT:
             pygame.quit() 
