@@ -8,6 +8,8 @@ fontH = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 32)
 fontH2 = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 26)
 fontH3 = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 16)
 fontH4 = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 14)
+# stench_img = pygame.image.load("icons/Stech.PNG")
+# stench_img = pygame.transform.scale(stench_img, (25,25))
 
 class text_box:
     def __init__(self, x, y, w, h, text=''):
@@ -101,23 +103,33 @@ class Button:
 
 class Grid:
     def __init__(self,x,y):
-        self.x = x
-        self.y = y
+        self.x = y
+        self.y = x
         self.rect = pygame.Rect(0,0,400,400)
+        #square_surface = []
+        self.size_x,self.size_y = 380//int(self.x),380//int(self.y)
+        for i in range(int(self.x)):
+            for j in range(int(self.y)):
+                pass
 
     def draw(self,screen,w,h):
         self.rect.center = (w//2,h//2)
         clear_grid_surface = pygame.Surface((400,400))
         clear_grid_surface.fill((0,0,0))
         screen.blit(clear_grid_surface, self.rect)
-        size_x,size_y = 380//int(self.x),380//int(self.y)
-        print(size_x)
-        print(size_y)
-        square_surface = pygame.Surface((size_x,size_y))
+        count_x = 0
+        count_y = 0
+        stench_img = pygame.image.load("icons/Stench.png")
+        icon_size = min(self.size_x,self.size_y)
+        stench_img = pygame.transform.scale(stench_img, (icon_size-5,icon_size-5))
+        square_surface = pygame.Surface((self.size_x,self.size_y))
         square_surface.fill((255,255,255))
-        for i in range(self.rect.left+2,self.rect.left+380,size_x+2):
-            for j in range(self.rect.top+2,self.rect.top+380,size_y+2):
+        for i in range(self.rect.left+2,self.rect.left+380,self.size_x+2):
+            for j in range(self.rect.top+2,self.rect.top+380,self.size_y+2):
                 screen.blit(square_surface, (i,j))
+                count_y += 1
+            count_x += 1
+        screen.blit(stench_img, (0,0))
 
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
