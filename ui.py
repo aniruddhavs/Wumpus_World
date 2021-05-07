@@ -101,35 +101,73 @@ class Button:
         else:
             return True
 
+class Grid_comp:
+    def __init__(self,count_x,count_y,size_x,size_y,left,top):
+        self.sizex = size_x
+        self.sizey = size_y
+        self.rect = pygame.Rect(left,top,size_x,size_y)
+        self.position = [count_x,count_y]
+
+    def draw(self,screen,x = None,y = None):
+        self.surface = pygame.Surface((self.sizex,self.sizey))
+        self.surface.fill((255,255,255))
+        if x and y:
+            new_rect = pygame.Rect.copy(self.rect)
+            new_rect.left = x
+            new_rect.top = y
+            screen.blit(self.surface, new_rect)
+        else:
+            screen.blit(self.surface,self.rect)
+
+    def is_selected(self,event):
+        if self.rect.collidepoint(event):
+            return True
+        else:
+            return False
+
+class setup_component:
+    pass
+
 class Grid:
     def __init__(self,x,y):
         self.x = y
         self.y = x
         self.rect = pygame.Rect(0,0,400,400)
-        #square_surface = []
         self.size_x,self.size_y = 380//int(self.x),380//int(self.y)
-        for i in range(int(self.x)):
-            for j in range(int(self.y)):
-                pass
 
-    def draw(self,screen,w,h):
-        self.rect.center = (w//2,h//2)
+    def draw(self,screen,x,y):
+        self.rect.center = (x,y)
         clear_grid_surface = pygame.Surface((400,400))
         clear_grid_surface.fill((0,0,0))
         screen.blit(clear_grid_surface, self.rect)
         count_x = 0
-        count_y = 0
-        stench_img = pygame.image.load("icons/Stench.png")
-        icon_size = min(self.size_x,self.size_y)
-        stench_img = pygame.transform.scale(stench_img, (icon_size-5,icon_size-5))
-        square_surface = pygame.Surface((self.size_x,self.size_y))
-        square_surface.fill((255,255,255))
+        self.grid_comp_list = []
         for i in range(self.rect.left+2,self.rect.left+380,self.size_x+2):
+            count_y = 0
             for j in range(self.rect.top+2,self.rect.top+380,self.size_y+2):
-                screen.blit(square_surface, (i,j))
+                square = Grid_comp(count_x,count_y,self.size_x,self.size_y,i,j)
+                self.grid_comp_list.append(square)
+                square.draw(screen)
                 count_y += 1
             count_x += 1
-        screen.blit(stench_img, (0,0))
+        for i in self.grid_comp_list:
+            print(i.position)
+
+    def setup(self,screen,event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                screen.fill((255,255,255))
+                grid.draw(screen, 210, 225)
+                mask_surface = pygame.Surface((640,480))
+                mask_surface.fill((0,0,0))
+                mask_surface.set_alpha(50)
+                screen.blit(mask_surface, (0,0))
+                for i in self.grid_comp_list:
+                    if i.is_selected(event.pos):
+                        count_x,count_y = i.position
+                        x = count_x*(self.size_x+2)+12
+                        y = count_y*(self.size_y+2)+27
+                        i.draw(screen,x=x,y=y)
 
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
@@ -172,10 +210,13 @@ while grid_setup_flag:
             exit(0) 
 grid = Grid(x_grid_in.text,y_grid_in.text)
 screen.fill((255,255,255))
-grid.draw(screen,width,height)
+grid.draw(screen,width//2,height//2)
 pygame.display.flip()
 while True:
     for event in pygame.event.get(): 
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            grid.setup(screen, event)
+            pygame.display.flip()
         if event.type==pygame.QUIT:
             pygame.quit() 
             exit(0)
