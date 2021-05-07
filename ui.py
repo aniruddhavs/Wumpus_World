@@ -8,8 +8,12 @@ fontH = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 32)
 fontH2 = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 26)
 fontH3 = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 16)
 fontH4 = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 14)
-# stench_img = pygame.image.load("icons/Stech.PNG")
-# stench_img = pygame.transform.scale(stench_img, (25,25))
+stench_img = pygame.image.load("icons/Stench.png")
+gold_img = pygame.image.load("icons/Gold.png")
+pit_img = pygame.image.load("icons/Pit.png")
+#global wumpus_img = pygame.image.load("icons/Wumpus.PNG")
+breeze_img = pygame.image.load("icons/Breeze.png")
+agent_img = pygame.image.load("icons/Agent.png")
 
 class text_box:
     def __init__(self, x, y, w, h, text=''):
@@ -126,7 +130,8 @@ class Grid_comp:
             return False
 
 class setup_component:
-    pass
+    def draw(self,screen):
+        global stench_img
 
 class Grid:
     def __init__(self,x,y):
@@ -156,14 +161,14 @@ class Grid:
     def setup(self,screen,event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
-                screen.fill((255,255,255))
-                grid.draw(screen, 210, 225)
-                mask_surface = pygame.Surface((640,480))
-                mask_surface.fill((0,0,0))
-                mask_surface.set_alpha(50)
-                screen.blit(mask_surface, (0,0))
                 for i in self.grid_comp_list:
                     if i.is_selected(event.pos):
+                        screen.fill((255,255,255))
+                        grid.draw(screen, 210, 225)
+                        mask_surface = pygame.Surface((640,480))
+                        mask_surface.fill((0,0,0))
+                        mask_surface.set_alpha(50)
+                        screen.blit(mask_surface, (0,0))
                         count_x,count_y = i.position
                         x = count_x*(self.size_x+2)+12
                         y = count_y*(self.size_y+2)+27
