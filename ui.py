@@ -111,6 +111,7 @@ class Grid_comp:
         self.sizey = size_y
         self.rect = pygame.Rect(left,top,size_x,size_y)
         self.position = [count_x,count_y]
+        self.content = 0
 
     def draw(self,screen,x = None,y = None):
         self.surface = pygame.Surface((self.sizex,self.sizey))
@@ -123,15 +124,70 @@ class Grid_comp:
         else:
             screen.blit(self.surface,self.rect)
 
-    def is_selected(self,event):
-        if self.rect.collidepoint(event):
-            return True
-        else:
-            return False
 
 class setup_component:
-    def draw(self,screen):
-        global stench_img
+    def __init__(self):
+        self.agent_rect = pygame.Rect(435,75,200,80)
+        self.gold_rect = pygame.Rect(435,170,200,80)
+        self.pit_rect = pygame.Rect(435,265,200,80)
+        #self.wumpus_rect = pygame.Rect(435,360,200,80)
+
+    def draw_options(self,screen):
+        global agent_img,gold_img,pit_img #,wumpus_img
+        global fontH2
+        scaled_agent_img = pygame.transform.scale(agent_img, (75, 75))
+        scaled_gold_img = pygame.transform.scale(gold_img, (75, 75))
+        scaled_pit_img = pygame.transform.scale(pit_img, (75, 75))
+        text_surf = fontH2.render("Choose:",True, (0,0,0))
+        text_rect = text_surf.get_rect()
+        text_rect.left = 435
+        text_rect.top = 25
+        agent_option_surf = fontH2.render("Agent",True, (0,0,0))
+        agent_option_rect = agent_option_surf.get_rect()
+        agent_option_rect.left = self.agent_rect.left+5
+        agent_option_rect.centery = self.agent_rect.centery
+        gold_option_surf = fontH2.render("Gold",True, (0,0,0))
+        gold_option_rect = gold_option_surf.get_rect()
+        gold_option_rect.left = self.gold_rect.left+5
+        gold_option_rect.centery = self.gold_rect.centery
+        pit_option_surf = fontH2.render("Pit",True, (0,0,0))
+        pit_option_rect = pit_option_surf.get_rect()
+        pit_option_rect.left = self.pit_rect.left+5
+        pit_option_rect.centery = self.pit_rect.centery
+        option_img_rect = scaled_agent_img.get_rect()
+        option_img_rect.right = self.agent_rect.right-20
+        option_img_rect.centery = self.agent_rect.centery
+        agent_surf = pygame.Surface((200,80),pygame.SRCALPHA)
+        agent_surf.fill((255,255,255,0))
+        new_rect = pygame.Rect.copy(self.agent_rect)
+        new_rect.x,new_rect.y = 0,0
+        pygame.draw.rect(agent_surf, (255,255,255), new_rect,0,10)
+        screen.blit(agent_surf, self.agent_rect)
+        screen.blit(agent_surf, self.gold_rect)
+        screen.blit(agent_surf, self.pit_rect)
+        screen.blit(text_surf,text_rect)
+        screen.blit(agent_option_surf,agent_option_rect)
+        screen.blit(scaled_agent_img,option_img_rect)
+        screen.blit(gold_option_surf,gold_option_rect)
+        option_img_rect.centery = self.gold_rect.centery
+        screen.blit(scaled_gold_img,option_img_rect)
+        screen.blit(pit_option_surf,pit_option_rect)
+        option_img_rect.centery = self.pit_rect.centery
+        screen.blit(scaled_pit_img,option_img_rect)
+
+    def option_select(self,event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            #print(event.pos)
+            if self.agent_rect.collidepoint(event.pos):
+                return 1
+            elif self.gold_rect.collidepoint(event.pos):
+                return 2
+            elif self.pit_rect.collidepoint(event.pos):
+                return 3
+            # elif self.agent_rect.collidepoint(event.pos):
+            #     return 4
+            else:
+                return 0
 
 class Grid:
     def __init__(self,x,y):
@@ -155,24 +211,34 @@ class Grid:
                 square.draw(screen)
                 count_y += 1
             count_x += 1
-        for i in self.grid_comp_list:
-            print(i.position)
 
     def setup(self,screen,event):
+        flag = False
+        options = setup_component()
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.rect.collidepoint(event.pos):
-                for i in self.grid_comp_list:
-                    if i.is_selected(event.pos):
-                        screen.fill((255,255,255))
-                        grid.draw(screen, 210, 225)
-                        mask_surface = pygame.Surface((640,480))
-                        mask_surface.fill((0,0,0))
-                        mask_surface.set_alpha(50)
-                        screen.blit(mask_surface, (0,0))
-                        count_x,count_y = i.position
-                        x = count_x*(self.size_x+2)+12
-                        y = count_y*(self.size_y+2)+27
-                        i.draw(screen,x=x,y=y)
+            for i in self.grid_comp_list:
+                if i.rect.collidepoint(event.pos):
+                    screen.fill((255,255,255))
+                    grid.draw(screen, 210, 225)
+                    mask_surface = pygame.Surface((640,480))
+                    mask_surface.fill((0,0,0))
+                    mask_surface.set_alpha(50)
+                    screen.blit(mask_surface, (0,0))
+                    count_x,count_y = i.position
+                    x = count_x*(self.size_x+2)+12
+                    y = count_y*(self.size_y+2)+27
+                    flag = i.draw(screen,x=x,y=y)
+                    options.draw_options(screen)
+                    break
+            if i:
+                i.content = options.option_select(event)
+                print(i.position)
+                print(i.content)
+                if i.content > 0:
+                    flag = True
+            if flag:
+                screen.fill((255,255,255))
+                self.draw(screen, 320, 240)
 
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
