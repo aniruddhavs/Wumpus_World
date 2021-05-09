@@ -112,6 +112,17 @@ class Grid_comp:
         self.rect = pygame.Rect(0,0,size_x,size_y)
         self.position = [count_x,count_y]
         self.content = 0
+        global agent_img
+        global pit_img
+        global breeze_img
+        global gold_img
+        global stench_img
+        scale_factor = min(size_x,size_y)
+        self.scaled_agent = pygame.transform.scale(agent_img,(scale_factor,scale_factor))
+        self.scaled_pit = pygame.transform.scale(pit_img,(scale_factor,scale_factor))
+        self.scaled_breeze = pygame.transform.scale(breeze_img,(scale_factor,scale_factor))
+        self.scaled_gold = pygame.transform.scale(gold_img,(scale_factor,scale_factor))
+        self.scaled_stench = pygame.transform.scale(stench_img,(scale_factor,scale_factor))
 
     def update_co_ordinates(self,left,top):
         self.rect.left,self.rect.top = left,top
@@ -123,9 +134,17 @@ class Grid_comp:
             new_rect = pygame.Rect.copy(self.rect)
             new_rect.left = x
             new_rect.top = y
-            screen.blit(self.surface, new_rect)
         else:
-            screen.blit(self.surface,self.rect)
+            new_rect = pygame.Rect.copy(self.rect)
+        screen.blit(self.surface, new_rect)
+        if self.content == 1:
+            screen.blit(self.scaled_agent, new_rect)
+        elif self.content == 2:
+            screen.blit(self.scaled_gold, new_rect)
+        elif self.content == 3:
+            screen.blit(self.scaled_pit, new_rect)
+        elif self.content == 4:
+            screen.blit(self.scaled_breeze, new_rect)
 
 class setup_component:
     def __init__(self):
@@ -179,7 +198,6 @@ class setup_component:
 
     def option_select(self,event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            #print(event.pos)
             if self.agent_rect.collidepoint(event.pos):
                 return 1
             elif self.gold_rect.collidepoint(event.pos):
@@ -243,7 +261,15 @@ class Grid:
                     break
             if self.selected_grid_comp >= 0:
                 self.grid_comp_list[self.selected_grid_comp].content= options.option_select(event)
+                posx,posy = self.grid_comp_list[self.selected_grid_comp].position
                 if self.grid_comp_list[self.selected_grid_comp].content > 0:
+                    if self.grid_comp_list[self.selected_grid_comp].content == 3:
+                        for i in self.grid_comp_list:
+                            test_posx,test_posy = i.position
+                            if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
+                                i.content = 4
+                            elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
+                                i.content = 4
                     flag = True
                     self.selected_grid_comp = -1
             if flag:
