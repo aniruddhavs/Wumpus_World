@@ -106,12 +106,15 @@ class Button:
             return True
 
 class Grid_comp:
-    def __init__(self,count_x,count_y,size_x,size_y,left,top):
+    def __init__(self,count_x,count_y,size_x,size_y,left=None,top=None):
         self.sizex = size_x
         self.sizey = size_y
-        self.rect = pygame.Rect(left,top,size_x,size_y)
+        self.rect = pygame.Rect(0,0,size_x,size_y)
         self.position = [count_x,count_y]
         self.content = 0
+
+    def update_co_ordinates(self,left,top):
+        self.rect.left,self.rect.top = left,top
 
     def draw(self,screen,x = None,y = None):
         self.surface = pygame.Surface((self.sizex,self.sizey))
@@ -123,7 +126,6 @@ class Grid_comp:
             screen.blit(self.surface, new_rect)
         else:
             screen.blit(self.surface,self.rect)
-
 
 class setup_component:
     def __init__(self):
@@ -195,28 +197,36 @@ class Grid:
         self.y = x
         self.rect = pygame.Rect(0,0,400,400)
         self.size_x,self.size_y = 380//int(self.x),380//int(self.y)
-
-    def draw(self,screen,x,y):
-        self.rect.center = (x,y)
-        clear_grid_surface = pygame.Surface((400,400))
-        clear_grid_surface.fill((0,0,0))
-        screen.blit(clear_grid_surface, self.rect)
+        self.selected_grid_comp = -1
         count_x = 0
         self.grid_comp_list = []
         for i in range(self.rect.left+2,self.rect.left+380,self.size_x+2):
             count_y = 0
             for j in range(self.rect.top+2,self.rect.top+380,self.size_y+2):
-                square = Grid_comp(count_x,count_y,self.size_x,self.size_y,i,j)
+                square = Grid_comp(count_x,count_y,self.size_x,self.size_y)
                 self.grid_comp_list.append(square)
-                square.draw(screen)
                 count_y += 1
             count_x += 1
+
+    def draw(self,screen,x,y):
+        self.rect.center = (x,y)
+        clear_grid_surface = pygame.Surface((400,400))
+        clear_grid_surface.fill((0,0,0))
+        index = 0
+        screen.blit(clear_grid_surface, self.rect)
+        for i in range(self.rect.left+2,self.rect.left+380,self.size_x+2):
+            for j in range(self.rect.top+2,self.rect.top+380,self.size_y+2):
+                self.grid_comp_list[index].update_co_ordinates(i,j)
+                self.grid_comp_list[index].draw(screen)
+                index += 1 
+
 
     def setup(self,screen,event):
         flag = False
         options = setup_component()
         if event.type == pygame.MOUSEBUTTONDOWN:
             for i in self.grid_comp_list:
+                j=self.grid_comp_list.index(i)
                 if i.rect.collidepoint(event.pos):
                     screen.fill((255,255,255))
                     grid.draw(screen, 210, 225)
@@ -229,13 +239,13 @@ class Grid:
                     y = count_y*(self.size_y+2)+27
                     flag = i.draw(screen,x=x,y=y)
                     options.draw_options(screen)
+                    self.selected_grid_comp = j
                     break
-            if i:
-                i.content = options.option_select(event)
-                print(i.position)
-                print(i.content)
-                if i.content > 0:
+            if self.selected_grid_comp >= 0:
+                self.grid_comp_list[self.selected_grid_comp].content= options.option_select(event)
+                if self.grid_comp_list[self.selected_grid_comp].content > 0:
                     flag = True
+                    self.selected_grid_comp = -1
             if flag:
                 screen.fill((255,255,255))
                 self.draw(screen, 320, 240)
