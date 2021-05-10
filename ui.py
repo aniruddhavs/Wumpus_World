@@ -11,7 +11,7 @@ fontH4 = pygame.font.Font('Inter-VariableFont_slnt,wght.ttf', 14)
 stench_img = pygame.image.load("icons/Stench.png")
 gold_img = pygame.image.load("icons/Gold.png")
 pit_img = pygame.image.load("icons/Pit.png")
-#global wumpus_img = pygame.image.load("icons/Wumpus.PNG")
+wumpus_img = pygame.image.load("icons/Wumpus.png")
 breeze_img = pygame.image.load("icons/Breeze.png")
 agent_img = pygame.image.load("icons/Agent.png")
 
@@ -117,12 +117,14 @@ class Grid_comp:
         global breeze_img
         global gold_img
         global stench_img
+        global wumpus_img
         scale_factor = min(size_x,size_y)
         self.scaled_agent = pygame.transform.scale(agent_img,(scale_factor,scale_factor))
         self.scaled_pit = pygame.transform.scale(pit_img,(scale_factor,scale_factor))
         self.scaled_breeze = pygame.transform.scale(breeze_img,(scale_factor,scale_factor))
         self.scaled_gold = pygame.transform.scale(gold_img,(scale_factor,scale_factor))
         self.scaled_stench = pygame.transform.scale(stench_img,(scale_factor,scale_factor))
+        self.scaled_wumpus = pygame.transform.scale(wumpus_img,(scale_factor,scale_factor))
 
     def update_co_ordinates(self,left,top):
         self.rect.left,self.rect.top = left,top
@@ -144,14 +146,18 @@ class Grid_comp:
         elif self.content == 3:
             screen.blit(self.scaled_pit, new_rect)
         elif self.content == 4:
+            screen.blit(self.scaled_wumpus, new_rect)
+        elif self.content == 5:
             screen.blit(self.scaled_breeze, new_rect)
+        elif self.content == 6:
+            screen.blit(self.scaled_stench, new_rect)
 
 class setup_component:
     def __init__(self):
         self.agent_rect = pygame.Rect(435,75,200,80)
         self.gold_rect = pygame.Rect(435,170,200,80)
         self.pit_rect = pygame.Rect(435,265,200,80)
-        #self.wumpus_rect = pygame.Rect(435,360,200,80)
+        self.wumpus_rect = pygame.Rect(435,360,200,80)
 
     def draw_options(self,screen):
         global agent_img,gold_img,pit_img #,wumpus_img
@@ -159,6 +165,7 @@ class setup_component:
         scaled_agent_img = pygame.transform.scale(agent_img, (75, 75))
         scaled_gold_img = pygame.transform.scale(gold_img, (75, 75))
         scaled_pit_img = pygame.transform.scale(pit_img, (75, 75))
+        scaled_wumpus_img = pygame.transform.scale(wumpus_img, (75, 75))
         text_surf = fontH2.render("Choose:",True, (0,0,0))
         text_rect = text_surf.get_rect()
         text_rect.left = 435
@@ -175,6 +182,10 @@ class setup_component:
         pit_option_rect = pit_option_surf.get_rect()
         pit_option_rect.left = self.pit_rect.left+5
         pit_option_rect.centery = self.pit_rect.centery
+        wumpus_option_surf = fontH2.render("Wumpus",True, (0,0,0))
+        wumpus_option_rect = wumpus_option_surf.get_rect()
+        wumpus_option_rect.left = self.wumpus_rect.left+5
+        wumpus_option_rect.centery = self.wumpus_rect.centery
         option_img_rect = scaled_agent_img.get_rect()
         option_img_rect.right = self.agent_rect.right-20
         option_img_rect.centery = self.agent_rect.centery
@@ -186,6 +197,7 @@ class setup_component:
         screen.blit(agent_surf, self.agent_rect)
         screen.blit(agent_surf, self.gold_rect)
         screen.blit(agent_surf, self.pit_rect)
+        screen.blit(agent_surf, self.wumpus_rect)
         screen.blit(text_surf,text_rect)
         screen.blit(agent_option_surf,agent_option_rect)
         screen.blit(scaled_agent_img,option_img_rect)
@@ -195,6 +207,9 @@ class setup_component:
         screen.blit(pit_option_surf,pit_option_rect)
         option_img_rect.centery = self.pit_rect.centery
         screen.blit(scaled_pit_img,option_img_rect)
+        screen.blit(wumpus_option_surf,wumpus_option_rect)
+        option_img_rect.centery = self.wumpus_rect.centery
+        screen.blit(scaled_wumpus_img,option_img_rect)
 
     def option_select(self,event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -204,8 +219,8 @@ class setup_component:
                 return 2
             elif self.pit_rect.collidepoint(event.pos):
                 return 3
-            # elif self.agent_rect.collidepoint(event.pos):
-            #     return 4
+            elif self.wumpus_rect.collidepoint(event.pos):
+                return 4
             else:
                 return 0
 
@@ -267,9 +282,16 @@ class Grid:
                         for i in self.grid_comp_list:
                             test_posx,test_posy = i.position
                             if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                i.content = 4
+                                i.content = 5
                             elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                i.content = 4
+                                i.content = 5
+                    if self.grid_comp_list[self.selected_grid_comp].content == 4:
+                        for i in self.grid_comp_list:
+                            test_posx,test_posy = i.position
+                            if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
+                                i.content = 6
+                            elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
+                                i.content = 6
                     flag = True
                     self.selected_grid_comp = -1
             if flag:
