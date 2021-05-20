@@ -211,7 +211,7 @@ class setup_component:
         option_img_rect.centery = self.wumpus_rect.centery
         screen.blit(scaled_wumpus_img,option_img_rect)
 
-    def option_select(self,event):
+    def option_select(self,event,prev_content):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.agent_rect.collidepoint(event.pos):
                 return 1
@@ -222,7 +222,7 @@ class setup_component:
             elif self.wumpus_rect.collidepoint(event.pos):
                 return 4
             else:
-                return 0
+                return prev_content
 
 class Grid:
     def __init__(self,x,y):
@@ -273,11 +273,11 @@ class Grid:
                     flag = i.draw(screen,x=x,y=y)
                     options.draw_options(screen)
                     self.selected_grid_comp = j
-                    break
+                    return
             if self.selected_grid_comp >= 0:
-                self.grid_comp_list[self.selected_grid_comp].content= options.option_select(event)
+                self.grid_comp_list[self.selected_grid_comp].content = options.option_select(event,self.grid_comp_list[self.selected_grid_comp].content)
                 posx,posy = self.grid_comp_list[self.selected_grid_comp].position
-                if self.grid_comp_list[self.selected_grid_comp].content > 0:
+                if self.grid_comp_list[self.selected_grid_comp].content >= 0:
                     if self.grid_comp_list[self.selected_grid_comp].content == 3:
                         for i in self.grid_comp_list:
                             test_posx,test_posy = i.position
