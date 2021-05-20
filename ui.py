@@ -154,18 +154,19 @@ class Grid_comp:
 
 class setup_component:
     def __init__(self):
-        self.agent_rect = pygame.Rect(435,75,200,80)
-        self.gold_rect = pygame.Rect(435,170,200,80)
-        self.pit_rect = pygame.Rect(435,265,200,80)
-        self.wumpus_rect = pygame.Rect(435,360,200,80)
+        self.agent_rect = pygame.Rect(435,75,200,65)
+        self.gold_rect = pygame.Rect(435,155,200,65)
+        self.pit_rect = pygame.Rect(435,235,200,65)
+        self.wumpus_rect = pygame.Rect(435,315,200,65)
+        self.clear_rect = pygame.Rect(435,395,200,65)
 
     def draw_options(self,screen):
-        global agent_img,gold_img,pit_img #,wumpus_img
+        global agent_img,gold_img,pit_img,wumpus_img
         global fontH2
-        scaled_agent_img = pygame.transform.scale(agent_img, (75, 75))
-        scaled_gold_img = pygame.transform.scale(gold_img, (75, 75))
-        scaled_pit_img = pygame.transform.scale(pit_img, (75, 75))
-        scaled_wumpus_img = pygame.transform.scale(wumpus_img, (75, 75))
+        scaled_agent_img = pygame.transform.scale(agent_img, (65, 65))
+        scaled_gold_img = pygame.transform.scale(gold_img, (65, 65))
+        scaled_pit_img = pygame.transform.scale(pit_img, (65, 65))
+        scaled_wumpus_img = pygame.transform.scale(wumpus_img, (65, 65))
         text_surf = fontH2.render("Choose:",True, (0,0,0))
         text_rect = text_surf.get_rect()
         text_rect.left = 435
@@ -186,10 +187,13 @@ class setup_component:
         wumpus_option_rect = wumpus_option_surf.get_rect()
         wumpus_option_rect.left = self.wumpus_rect.left+5
         wumpus_option_rect.centery = self.wumpus_rect.centery
+        clear_option_surf = fontH2.render("Clear",True, (0,0,0))
+        clear_option_rect = clear_option_surf.get_rect()
+        clear_option_rect.center = self.clear_rect.center
         option_img_rect = scaled_agent_img.get_rect()
         option_img_rect.right = self.agent_rect.right-20
         option_img_rect.centery = self.agent_rect.centery
-        agent_surf = pygame.Surface((200,80),pygame.SRCALPHA)
+        agent_surf = pygame.Surface((200,65),pygame.SRCALPHA)
         agent_surf.fill((255,255,255,0))
         new_rect = pygame.Rect.copy(self.agent_rect)
         new_rect.x,new_rect.y = 0,0
@@ -198,6 +202,7 @@ class setup_component:
         screen.blit(agent_surf, self.gold_rect)
         screen.blit(agent_surf, self.pit_rect)
         screen.blit(agent_surf, self.wumpus_rect)
+        screen.blit(agent_surf, self.clear_rect)
         screen.blit(text_surf,text_rect)
         screen.blit(agent_option_surf,agent_option_rect)
         screen.blit(scaled_agent_img,option_img_rect)
@@ -210,6 +215,7 @@ class setup_component:
         screen.blit(wumpus_option_surf,wumpus_option_rect)
         option_img_rect.centery = self.wumpus_rect.centery
         screen.blit(scaled_wumpus_img,option_img_rect)
+        screen.blit(clear_option_surf,clear_option_rect)
 
     def option_select(self,event,prev_content):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -221,6 +227,8 @@ class setup_component:
                 return 3
             elif self.wumpus_rect.collidepoint(event.pos):
                 return 4
+            elif self.clear_rect.collidepoint(event.pos):
+                return 0
             else:
                 return prev_content
 
@@ -252,7 +260,6 @@ class Grid:
                 self.grid_comp_list[index].update_co_ordinates(i,j)
                 self.grid_comp_list[index].draw(screen)
                 index += 1 
-
 
     def setup(self,screen,event):
         flag = False
