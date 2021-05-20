@@ -228,7 +228,12 @@ class setup_component:
             elif self.wumpus_rect.collidepoint(event.pos):
                 return 4
             elif self.clear_rect.collidepoint(event.pos):
-                return 0
+                if prev_content >= 5:
+                    return prev_content
+                if prev_content == 3 or prev_content == 4:
+                    return 10
+                else:
+                    return 0
             else:
                 return prev_content
 
@@ -299,6 +304,14 @@ class Grid:
                                 i.content = 6
                             elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
                                 i.content = 6
+                    if self.grid_comp_list[self.selected_grid_comp].content == 10:
+                        for i in self.grid_comp_list:
+                            test_posx,test_posy = i.position
+                            if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
+                                i.content = 0
+                            elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
+                                i.content = 0
+                        self.grid_comp_list[self.selected_grid_comp].content = 0 
                     flag = True
                     self.selected_grid_comp = -1
             if flag:
