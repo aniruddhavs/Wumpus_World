@@ -220,20 +220,15 @@ class setup_component:
     def option_select(self,event,prev_content):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.agent_rect.collidepoint(event.pos):
-                return 1
+                return prev_content*10+1
             elif self.gold_rect.collidepoint(event.pos):
-                return 2
+                return prev_content*10+2
             elif self.pit_rect.collidepoint(event.pos):
-                return 3
+                return prev_content*10+3
             elif self.wumpus_rect.collidepoint(event.pos):
-                return 4
+                return prev_content*10+4
             elif self.clear_rect.collidepoint(event.pos):
-                if prev_content >= 5:
-                    return prev_content
-                if prev_content == 3 or prev_content == 4:
-                    return 10
-                else:
-                    return 0
+                return prev_content*10
             else:
                 return prev_content
 
@@ -244,6 +239,9 @@ class Grid:
         self.rect = pygame.Rect(0,0,400,400)
         self.size_x,self.size_y = 380//int(self.x),380//int(self.y)
         self.selected_grid_comp = -1
+        self.gold_present = False
+        self.wumpus_present = False
+        self.agent_present = False
         count_x = 0
         self.grid_comp_list = []
         for i in range(self.rect.left+2,self.rect.left+380,self.size_x+2):
@@ -267,7 +265,10 @@ class Grid:
                 index += 1 
 
     def setup(self,screen,event):
+        global fontH3
         flag = False
+        msg_flag = False
+        msg = ""
         options = setup_component()
         if event.type == pygame.MOUSEBUTTONDOWN:
             for i in self.grid_comp_list:
@@ -287,9 +288,50 @@ class Grid:
                     self.selected_grid_comp = j
                     return
             if self.selected_grid_comp >= 0:
+                temp = self.grid_comp_list[self.selected_grid_comp].content
                 self.grid_comp_list[self.selected_grid_comp].content = options.option_select(event,self.grid_comp_list[self.selected_grid_comp].content)
                 posx,posy = self.grid_comp_list[self.selected_grid_comp].position
                 if self.grid_comp_list[self.selected_grid_comp].content >= 0:
+                    if self.grid_comp_list[self.selected_grid_comp].content in range(10,19) :
+                        self.grid_comp_list[self.selected_grid_comp].content %= 10
+                        self.agent_present = False
+                    elif self.grid_comp_list[self.selected_grid_comp].content in range(20,29):
+                        self.grid_comp_list[self.selected_grid_comp].content %= 10
+                        self.gold_present = False
+                    elif self.grid_comp_list[self.selected_grid_comp].content in range(30,39):
+                        self.grid_comp_list[self.selected_grid_comp].content %= 10
+                        for i in self.grid_comp_list:
+                            test_posx,test_posy = i.position
+                            if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
+                                i.content = 0
+                            elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
+                                i.content = 0
+                    elif self.grid_comp_list[self.selected_grid_comp].content in range(40,49):
+                        self.grid_comp_list[self.selected_grid_comp].content %= 10 
+                        for i in self.grid_comp_list:
+                            test_posx,test_posy = i.position
+                            if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
+                                i.content = 0
+                            elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
+                                i.content = 0
+                        self.wumpus_present = False
+                    print(self.grid_comp_list[self.selected_grid_comp].content)
+                    print(self.agent_present,self.gold_present,self.wumpus_present)
+                    print(temp)
+                    if self.grid_comp_list[self.selected_grid_comp].content == 1:
+                        if self.agent_present:
+                            self.grid_comp_list[self.selected_grid_comp].content = temp
+                            msg = "More than one agent is not allowed."
+                            msg_flag = True
+                        else:
+                            self.agent_present = True
+                    if self.grid_comp_list[self.selected_grid_comp].content == 2:
+                        if self.gold_present:
+                            self.grid_comp_list[self.selected_grid_comp].content = temp
+                            msg = "More than one gold is not allowed."
+                            msg_flag = True
+                        else:
+                            self.gold_present = True
                     if self.grid_comp_list[self.selected_grid_comp].content == 3:
                         for i in self.grid_comp_list:
                             test_posx,test_posy = i.position
@@ -298,25 +340,31 @@ class Grid:
                             elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
                                 i.content = 5
                     if self.grid_comp_list[self.selected_grid_comp].content == 4:
-                        for i in self.grid_comp_list:
-                            test_posx,test_posy = i.position
-                            if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                i.content = 6
-                            elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                i.content = 6
-                    if self.grid_comp_list[self.selected_grid_comp].content == 10:
-                        for i in self.grid_comp_list:
-                            test_posx,test_posy = i.position
-                            if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                i.content = 0
-                            elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                i.content = 0
-                        self.grid_comp_list[self.selected_grid_comp].content = 0 
+                        if not self.wumpus_present:
+                            for i in self.grid_comp_list:
+                                test_posx,test_posy = i.position
+                                if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
+                                    i.content = 6
+                                elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
+                                    i.content = 6
+                            self.wumpus_present = True
+                        else:
+                            self.grid_comp_list[self.selected_grid_comp].content = temp
+                            msg = "More than one Wumpus is not allowed."
+                            msg_flag = True
+                    
                     flag = True
                     self.selected_grid_comp = -1
             if flag:
                 screen.fill((255,255,255))
                 self.draw(screen, 320, 240)
+                if msg_flag:
+                    msg_surf = fontH3.render(msg, True, (0,0,0))
+                    msg_rect = msg_surf.get_rect()
+                    msg_rect.bottom = 475
+                    msg_rect.centerx = 320
+                    screen.blit(msg_surf,msg_rect)
+
 
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
