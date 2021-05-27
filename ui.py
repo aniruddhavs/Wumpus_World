@@ -163,17 +163,30 @@ class Grid_comp:
                 half_rect = pygame.Rect.copy(new_rect)
                 half_rect.width,half_rect.height = half_rect.width//2,half_rect.height//2
                 half_rect.centerx = new_rect.centerx
-                half_rect.top = new_rect.top
-                screen.blit(self.half_scaled_effects[self.effect], half_rect)
                 half_rect.bottom = new_rect.bottom
                 screen.blit(self.half_scale_img[self.content], half_rect)
+                half_rect.top = new_rect.top
+                if self.effect == 3:
+                    half_rect.left = new_rect.left
+                    screen.blit(self.half_scaled_effects[1], half_rect)
+                    half_rect.right = new_rect.right
+                    screen.blit(self.half_scaled_effects[2], half_rect)
+                else:
+                    screen.blit(self.half_scaled_effects[self.effect], half_rect)
             else:
                 screen.blit(self.full_scale_img[self.content], new_rect)
         if self.content == 0:
             if self.effect >= 1:
-                screen.blit(self.full_scaled_effects[self.effect], new_rect)
-
-
+                if self.effect == 3:
+                    half_rect = pygame.Rect.copy(new_rect)
+                    half_rect.width,half_rect.height = half_rect.width//2,half_rect.height//2
+                    half_rect.top = new_rect.top
+                    half_rect.left = new_rect.left
+                    screen.blit(self.half_scaled_effects[1], half_rect)
+                    half_rect.right = new_rect.right
+                    screen.blit(self.half_scaled_effects[2], half_rect)
+                else:
+                    screen.blit(self.full_scaled_effects[self.effect], new_rect)
 
 class setup_component:
     def __init__(self):
@@ -326,17 +339,17 @@ class Grid:
                         for i in self.grid_comp_list:
                             test_posx,test_posy = i.position
                             if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                i.effect = 0
+                                i.effect -= 1
                             elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                i.effect = 0
+                                i.effect -= 1
                     elif self.grid_comp_list[self.selected_grid_comp].content in range(40,49):
                         self.grid_comp_list[self.selected_grid_comp].content %= 10 
                         for i in self.grid_comp_list:
                             test_posx,test_posy = i.position
                             if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                i.effect = 0
+                                i.effect -= 2
                             elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                i.effect = 0
+                                i.effect -= 2
                         self.wumpus_present = False
                     print(self.grid_comp_list[self.selected_grid_comp].content)
                     print(self.agent_present,self.gold_present,self.wumpus_present)
@@ -361,17 +374,17 @@ class Grid:
                         for i in self.grid_comp_list:
                             test_posx,test_posy = i.position
                             if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                i.effect = 1
+                                i.effect += 1
                             elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                i.effect = 1
+                                i.effect += 1
                     if self.grid_comp_list[self.selected_grid_comp].content == 4:
                         if not self.wumpus_present:
                             for i in self.grid_comp_list:
                                 test_posx,test_posy = i.position
                                 if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                    i.effect = 2
+                                    i.effect += 2
                                 elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                    i.effect = 2
+                                    i.effect += 2
                             self.wumpus_present = True
                         else:
                             self.grid_comp_list[self.selected_grid_comp].content = temp
