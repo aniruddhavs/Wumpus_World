@@ -112,6 +112,7 @@ class Grid_comp:
         self.rect = pygame.Rect(0,0,size_x,size_y)
         self.position = [count_x,count_y]
         self.content = 0
+        self.effect = 0
         global agent_img
         global pit_img
         global breeze_img
@@ -121,10 +122,28 @@ class Grid_comp:
         scale_factor = min(size_x,size_y)
         self.scaled_agent = pygame.transform.scale(agent_img,(scale_factor,scale_factor))
         self.scaled_pit = pygame.transform.scale(pit_img,(scale_factor,scale_factor))
-        self.scaled_breeze = pygame.transform.scale(breeze_img,(scale_factor,scale_factor))
-        self.scaled_gold = pygame.transform.scale(gold_img,(scale_factor,scale_factor))
-        self.scaled_stench = pygame.transform.scale(stench_img,(scale_factor,scale_factor))
         self.scaled_wumpus = pygame.transform.scale(wumpus_img,(scale_factor,scale_factor))
+        self.scaled_gold = pygame.transform.scale(gold_img,(scale_factor,scale_factor))
+        self.full_scale_img = {1:self.scaled_agent,
+                               2:self.scaled_gold,
+                               3:self.scaled_pit,
+                               4:self.scaled_wumpus}
+        self.half_scaled_agent = pygame.transform.scale(agent_img,(scale_factor//2,scale_factor//2))
+        self.half_scaled_pit = pygame.transform.scale(pit_img,(scale_factor//2,scale_factor//2))
+        self.half_scaled_wumpus = pygame.transform.scale(wumpus_img,(scale_factor//2,scale_factor//2))
+        self.half_scaled_gold = pygame.transform.scale(gold_img,(scale_factor//2,scale_factor//2))
+        self.half_scale_img = {1:self.half_scaled_agent,
+                               2:self.half_scaled_gold,
+                               3:self.half_scaled_pit,
+                               4:self.half_scaled_wumpus}
+        self.scaled_stench = pygame.transform.scale(stench_img,(scale_factor,scale_factor))
+        self.scaled_breeze = pygame.transform.scale(breeze_img,(scale_factor,scale_factor))
+        self.full_scaled_effects = {1:self.scaled_breeze,
+                                    2:self.scaled_stench}
+        self.half_scaled_stench = pygame.transform.scale(stench_img,(scale_factor//2,scale_factor//2))
+        self.half_scaled_breeze = pygame.transform.scale(breeze_img,(scale_factor//2,scale_factor//2))
+        self.half_scaled_effects = {1:self.half_scaled_breeze,
+                                    2:self.half_scaled_stench}
 
     def update_co_ordinates(self,left,top):
         self.rect.left,self.rect.top = left,top
@@ -139,18 +158,22 @@ class Grid_comp:
         else:
             new_rect = pygame.Rect.copy(self.rect)
         screen.blit(self.surface, new_rect)
-        if self.content == 1:
-            screen.blit(self.scaled_agent, new_rect)
-        elif self.content == 2:
-            screen.blit(self.scaled_gold, new_rect)
-        elif self.content == 3:
-            screen.blit(self.scaled_pit, new_rect)
-        elif self.content == 4:
-            screen.blit(self.scaled_wumpus, new_rect)
-        elif self.content == 5:
-            screen.blit(self.scaled_breeze, new_rect)
-        elif self.content == 6:
-            screen.blit(self.scaled_stench, new_rect)
+        if self.content >=1:
+            if self.effect >= 1:
+                half_rect = pygame.Rect.copy(new_rect)
+                half_rect.width,half_rect.height = half_rect.width//2,half_rect.height//2
+                half_rect.centerx = new_rect.centerx
+                half_rect.top = new_rect.top
+                screen.blit(self.half_scaled_effects[self.effect], half_rect)
+                half_rect.bottom = new_rect.bottom
+                screen.blit(self.half_scale_img[self.content], half_rect)
+            else:
+                screen.blit(self.full_scale_img[self.content], new_rect)
+        if self.content == 0:
+            if self.effect >= 1:
+                screen.blit(self.full_scaled_effects[self.effect], new_rect)
+
+
 
 class setup_component:
     def __init__(self):
@@ -303,17 +326,17 @@ class Grid:
                         for i in self.grid_comp_list:
                             test_posx,test_posy = i.position
                             if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                i.content = 0
+                                i.effect = 0
                             elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                i.content = 0
+                                i.effect = 0
                     elif self.grid_comp_list[self.selected_grid_comp].content in range(40,49):
                         self.grid_comp_list[self.selected_grid_comp].content %= 10 
                         for i in self.grid_comp_list:
                             test_posx,test_posy = i.position
                             if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                i.content = 0
+                                i.effect = 0
                             elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                i.content = 0
+                                i.effect = 0
                         self.wumpus_present = False
                     print(self.grid_comp_list[self.selected_grid_comp].content)
                     print(self.agent_present,self.gold_present,self.wumpus_present)
@@ -327,7 +350,9 @@ class Grid:
                             self.agent_present = True
                     if self.grid_comp_list[self.selected_grid_comp].content == 2:
                         if self.gold_present:
-                            self.grid_comp_list[self.selected_grid_comp].content = temp
+                            self.grid_comp_list[self.selected_grid_comp].content = temp 
+                            if temp == 1:
+                                self.agent_present = True
                             msg = "More than one gold is not allowed."
                             msg_flag = True
                         else:
@@ -336,20 +361,24 @@ class Grid:
                         for i in self.grid_comp_list:
                             test_posx,test_posy = i.position
                             if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                i.content = 5
+                                i.effect = 1
                             elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                i.content = 5
+                                i.effect = 1
                     if self.grid_comp_list[self.selected_grid_comp].content == 4:
                         if not self.wumpus_present:
                             for i in self.grid_comp_list:
                                 test_posx,test_posy = i.position
                                 if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                    i.content = 6
+                                    i.effect = 2
                                 elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                    i.content = 6
+                                    i.effect = 2
                             self.wumpus_present = True
                         else:
                             self.grid_comp_list[self.selected_grid_comp].content = temp
+                            if temp == 1:
+                                self.agent_present = True
+                            if temp == 2:
+                                self.gold_present = True
                             msg = "More than one Wumpus is not allowed."
                             msg_flag = True
                     
