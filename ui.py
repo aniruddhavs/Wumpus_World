@@ -1,4 +1,5 @@
 import pygame
+from pygame.display import update
 
 pygame.init()
 width,height = 640,480
@@ -148,7 +149,7 @@ class Grid_comp:
     def update_co_ordinates(self,left,top):
         self.rect.left,self.rect.top = left,top
 
-    def draw(self,screen,x = None,y = None):
+    def draw(self,screen,x = None,y = None,draw_agent = True,draw_effects = True):
         self.surface = pygame.Surface((self.sizex,self.sizey))
         self.surface.fill((255,255,255))
         if x and y:
@@ -158,8 +159,11 @@ class Grid_comp:
         else:
             new_rect = pygame.Rect.copy(self.rect)
         screen.blit(self.surface, new_rect)
-        if self.content >=1:
+        if self.content == 1 and not draw_agent:
             if self.effect >= 1:
+                screen.blit(self.full_scaled_effects[self.effect], new_rect)
+        elif self.content >=1:
+            if self.effect >= 1 and draw_effects:
                 half_rect = pygame.Rect.copy(new_rect)
                 half_rect.width,half_rect.height = half_rect.width//2,half_rect.height//2
                 half_rect.centerx = new_rect.centerx
@@ -280,7 +284,10 @@ class Grid:
         self.agent_present = False
         count_x = 0
         self.grid_comp_list = []
-        for i in range(self.rect.left+2,self.rect.left+380,self.size_x+2):
+        self.agent_position = [-1,-1]
+        self.agent_index = -1
+
+        for _ in range(self.rect.left+2,self.rect.left+380,self.size_x+2):
             count_y = 0
             for j in range(self.rect.top+2,self.rect.top+380,self.size_y+2):
                 square = Grid_comp(count_x,count_y,self.size_x,self.size_y)
@@ -288,7 +295,7 @@ class Grid:
                 count_y += 1
             count_x += 1
 
-    def draw(self,screen,x,y):
+    def draw(self,screen,x,y,draw_agent = True):
         self.rect.center = (x,y)
         clear_grid_surface = pygame.Surface((400,400))
         clear_grid_surface.fill((0,0,0))
@@ -297,8 +304,28 @@ class Grid:
         for i in range(self.rect.left+2,self.rect.left+380,self.size_x+2):
             for j in range(self.rect.top+2,self.rect.top+380,self.size_y+2):
                 self.grid_comp_list[index].update_co_ordinates(i,j)
-                self.grid_comp_list[index].draw(screen)
+                self.grid_comp_list[index].draw(screen,draw_agent = draw_agent)
                 index += 1 
+
+    def move(self,screen,direction = 0):
+        if self.agent_present:
+            x,y = self.grid_comp_list[self.agent_index].rect.left,self.grid_comp_list[self.agent_index].rect.top
+            movement_length = self.grid_comp_list[self.agent_index].sizex
+            if self.agent_position[0] in range(0,int(self.x)-1):
+                screen.fill((255,255,255))
+                self.draw(screen, 320, 240,False)
+                pygame.display.update()
+                for movex in range(0,movement_length+3):
+                    pygame.time.delay(50)
+                    screen.fill((255,255,255))
+                    self.draw(screen, 320, 240,False)
+                    self.grid_comp_list[self.agent_index].draw(screen,x+movex,y,draw_effects = False)
+                    pygame.display.update()
+                self.grid_comp_list[self.agent_index].content = 0
+                self.agent_index += int(self.y)
+                self.grid_comp_list[self.agent_index].content = 1
+                self.agent_position = self.grid_comp_list[self.agent_index].position
+            print(x,y)
 
     def setup(self,screen,event):
         global fontH3
@@ -331,6 +358,7 @@ class Grid:
                     if self.grid_comp_list[self.selected_grid_comp].content in range(10,19) :
                         self.grid_comp_list[self.selected_grid_comp].content %= 10
                         self.agent_present = False
+                        self.agent_position = [-1,-1]
                     elif self.grid_comp_list[self.selected_grid_comp].content in range(20,29):
                         self.grid_comp_list[self.selected_grid_comp].content %= 10
                         self.gold_present = False
@@ -351,9 +379,7 @@ class Grid:
                             elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
                                 i.effect -= 2
                         self.wumpus_present = False
-                    print(self.grid_comp_list[self.selected_grid_comp].content)
-                    print(self.agent_present,self.gold_present,self.wumpus_present)
-                    print(temp)
+                    print(self.agent_position)
                     if self.grid_comp_list[self.selected_grid_comp].content == 1:
                         if self.agent_present:
                             self.grid_comp_list[self.selected_grid_comp].content = temp
@@ -361,6 +387,8 @@ class Grid:
                             msg_flag = True
                         else:
                             self.agent_present = True
+                            self.agent_position = self.grid_comp_list[self.selected_grid_comp].position
+                            self.agent_index = self.selected_grid_comp
                     if self.grid_comp_list[self.selected_grid_comp].content == 2:
                         if self.gold_present:
                             self.grid_comp_list[self.selected_grid_comp].content = temp 
@@ -400,13 +428,13 @@ class Grid:
             if flag:
                 screen.fill((255,255,255))
                 self.draw(screen, 320, 240)
+                self.move(screen)
                 if msg_flag:
                     msg_surf = fontH3.render(msg, True, (0,0,0))
                     msg_rect = msg_surf.get_rect()
                     msg_rect.bottom = 475
                     msg_rect.centerx = 320
                     screen.blit(msg_surf,msg_rect)
-
 
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
