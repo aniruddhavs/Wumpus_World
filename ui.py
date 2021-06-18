@@ -307,24 +307,54 @@ class Grid:
                 self.grid_comp_list[index].draw(screen,draw_agent = draw_agent)
                 index += 1 
 
-    def move(self,screen,direction = 0):
+    def move(self,screen,direction):
+        print(self.agent_position)
         if self.agent_present:
             x,y = self.grid_comp_list[self.agent_index].rect.left,self.grid_comp_list[self.agent_index].rect.top
-            movement_length = self.grid_comp_list[self.agent_index].sizex
-            if self.agent_position[0] in range(0,int(self.x)-1):
+            if direction == 0 or direction == 1:
+                movement_length = self.grid_comp_list[self.agent_index].sizex
+            elif direction == 2 or direction == 3:
+                movement_length = self.grid_comp_list[self.agent_index].sizey
+            if self.agent_position[0] in range(0,int(self.x)-1) and direction == 0:
+                flag = True
+            elif self.agent_position[0] in range(1,int(self.x)) and direction == 1:
+                flag = True
+            elif self.agent_position[1] in range(0,int(self.y)-1) and direction == 2:
+                flag = True
+            elif self.agent_position[1] in range(1,int(self.y)) and direction == 3:
+                flag = True
+            else:
+                flag = False
+            if flag:
                 screen.fill((255,255,255))
                 self.draw(screen, 320, 240,False)
                 pygame.display.update()
-                for movex in range(0,movement_length+3):
+                if direction == 0:
+                    move = [[movex,0] for movex in range(0,movement_length+3)]
+                elif direction == 1:
+                    move = [[-movex,0] for movex in range(0,movement_length+3)]
+                elif direction == 2:
+                    move = [[0,movey] for movey in range(0,movement_length+3)]
+                elif direction == 3:
+                    move = [[0,-movey] for movey in range(0,movement_length+3)]
+                for i,j in move:
                     pygame.time.delay(50)
                     screen.fill((255,255,255))
                     self.draw(screen, 320, 240,False)
-                    self.grid_comp_list[self.agent_index].draw(screen,x+movex,y,draw_effects = False)
+                    self.grid_comp_list[self.agent_index].draw(screen,x+i,y+j,draw_effects = False)
                     pygame.display.update()
                 self.grid_comp_list[self.agent_index].content = 0
-                self.agent_index += int(self.y)
+                if direction == 0:
+                    self.agent_index += int(self.y)
+                elif direction == 1:
+                    self.agent_index -= int(self.y)
+                elif direction == 2:
+                    self.agent_index += 1
+                elif direction == 3:
+                    self.agent_index -= 1
                 self.grid_comp_list[self.agent_index].content = 1
                 self.agent_position = self.grid_comp_list[self.agent_index].position
+            print(self.agent_position)
             print(x,y)
 
     def setup(self,screen,event):
@@ -428,7 +458,7 @@ class Grid:
             if flag:
                 screen.fill((255,255,255))
                 self.draw(screen, 320, 240)
-                self.move(screen)
+                self.move(screen,3)
                 if msg_flag:
                     msg_surf = fontH3.render(msg, True, (0,0,0))
                     msg_rect = msg_surf.get_rect()
