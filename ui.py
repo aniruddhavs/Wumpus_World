@@ -105,6 +105,28 @@ class Button:
                 return True
         else:
             return True
+    def start_event(self,event,screen,a,g,w):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                try:
+                    clear_surf = pygame.Surface((self.error_surf_rect.w,self.error_surf_rect.h))
+                    clear_surf.fill((255,255,255))
+                    screen.blit(clear_surf, self.error_surf_rect)
+                except:
+                    pass
+                if a and g and w:
+                    return False
+                else:
+                    self.error_surf = fontH4.render("Must contain Agent,Gold and Wumpus", True, (0,0,0))
+                    self.error_surf_rect = self.error_surf.get_rect()
+                    self.error_surf_rect.centerx = 320
+                    self.error_surf_rect.bottom = 460
+                    screen.blit(self.error_surf, self.error_surf_rect)
+                    return True
+            else:
+                return True
+        else:
+            return True
 
 class Grid_comp:
     def __init__(self,count_x,count_y,size_x,size_y,left=None,top=None):
@@ -286,7 +308,7 @@ class Grid:
         self.grid_comp_list = []
         self.agent_position = [-1,-1]
         self.agent_index = -1
-
+        self.start_button = Button(550,220,80,40,"Start!")
         for _ in range(self.rect.left+2,self.rect.left+380,self.size_x+2):
             count_y = 0
             for j in range(self.rect.top+2,self.rect.top+380,self.size_y+2):
@@ -295,7 +317,7 @@ class Grid:
                 count_y += 1
             count_x += 1
 
-    def draw(self,screen,x,y,draw_agent = True):
+    def draw(self,screen,x,y,draw_agent = True,show_button=True):
         self.rect.center = (x,y)
         clear_grid_surface = pygame.Surface((400,400))
         clear_grid_surface.fill((0,0,0))
@@ -306,6 +328,8 @@ class Grid:
                 self.grid_comp_list[index].update_co_ordinates(i,j)
                 self.grid_comp_list[index].draw(screen,draw_agent = draw_agent)
                 index += 1 
+        if show_button:
+            self.start_button.draw(screen)
 
     def move(self,screen,direction):
         print(self.agent_position)
@@ -368,7 +392,7 @@ class Grid:
                 j=self.grid_comp_list.index(i)
                 if i.rect.collidepoint(event.pos):
                     screen.fill((255,255,255))
-                    grid.draw(screen, 210, 225)
+                    grid.draw(screen, 210, 225,show_button=False)
                     mask_surface = pygame.Surface((640,480))
                     mask_surface.fill((0,0,0))
                     mask_surface.set_alpha(50)
@@ -458,7 +482,6 @@ class Grid:
             if flag:
                 screen.fill((255,255,255))
                 self.draw(screen, 320, 240)
-                self.move(screen,3)
                 if msg_flag:
                     msg_surf = fontH3.render(msg, True, (0,0,0))
                     msg_rect = msg_surf.get_rect()
@@ -509,11 +532,18 @@ grid = Grid(x_grid_in.text,y_grid_in.text)
 screen.fill((255,255,255))
 grid.draw(screen,width//2,height//2)
 pygame.display.flip()
-while True:
+setup_flag = True
+while setup_flag:
     for event in pygame.event.get(): 
         if event.type == pygame.MOUSEBUTTONDOWN:
             grid.setup(screen, event)
+            setup_flag = grid.start_button.start_event(event,screen,grid.agent_present,grid.gold_present,grid.wumpus_present)
             pygame.display.flip()
+        if event.type==pygame.QUIT:
+            pygame.quit() 
+            exit(0)
+while True:
+    for event in pygame.event.get(): 
         if event.type==pygame.QUIT:
             pygame.quit() 
             exit(0)
