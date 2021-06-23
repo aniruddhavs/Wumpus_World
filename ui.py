@@ -351,7 +351,7 @@ class Grid:
                 flag = False
             if flag:
                 screen.fill((255,255,255))
-                self.draw(screen, 320, 240,False)
+                self.draw(screen, 320, 240,False,False)
                 pygame.display.update()
                 if direction == 0:
                     move = [[movex,0] for movex in range(0,movement_length+3)]
@@ -364,7 +364,7 @@ class Grid:
                 for i,j in move:
                     pygame.time.delay(50)
                     screen.fill((255,255,255))
-                    self.draw(screen, 320, 240,False)
+                    self.draw(screen, 320, 240,False,False)
                     self.grid_comp_list[self.agent_index].draw(screen,x+i,y+j,draw_effects = False)
                     pygame.display.update()
                 self.grid_comp_list[self.agent_index].content = 0
@@ -456,9 +456,11 @@ class Grid:
                         for i in self.grid_comp_list:
                             test_posx,test_posy = i.position
                             if (test_posx == posx+1 or test_posx == posx-1) and test_posy == posy:
-                                i.effect += 1
+                                if i.effect != 1:
+                                    i.effect += 1
                             elif (test_posy == posy+1 or test_posy == posy-1) and test_posx == posx:
-                                i.effect += 1
+                                if i.effect != 1:
+                                    i.effect += 1
                     if self.grid_comp_list[self.selected_grid_comp].content == 4:
                         if not self.wumpus_present:
                             for i in self.grid_comp_list:
@@ -488,6 +490,12 @@ class Grid:
                     msg_rect.bottom = 475
                     msg_rect.centerx = 320
                     screen.blit(msg_surf,msg_rect)
+
+class Search_Agent:
+    def __init__(self,grid):
+        self.safe_list = []
+        self.tree = {}
+        self.working_grid = grid
 
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
@@ -542,6 +550,12 @@ while setup_flag:
         if event.type==pygame.QUIT:
             pygame.quit() 
             exit(0)
+screen.fill((255,255,255))
+grid.draw(screen,width//2,height//2,show_button=False)
+pygame.display.flip()
+#grid.move(screen,0)
+grid.draw(screen,width//2,height//2,show_button=False)
+pygame.display.flip()
 while True:
     for event in pygame.event.get(): 
         if event.type==pygame.QUIT:
