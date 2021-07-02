@@ -341,9 +341,9 @@ class Grid:
             self.start_button.draw(screen)
 
     def move(self,screen,direction):
-        print("Move is called")
-        print(direction)
-        print(self.agent_position)
+        # print("Move is called")
+        # print(direction)
+        # print(self.agent_position)
         if self.agent_present:
             x,y = self.grid_comp_list[self.agent_index].rect.left,self.grid_comp_list[self.agent_index].rect.top
             if direction == 0 or direction == 1:
@@ -389,9 +389,9 @@ class Grid:
                     self.agent_index -= 1
                 self.grid_comp_list[self.agent_index].content += 1
                 self.agent_position = self.grid_comp_list[self.agent_index].position
-            print(flag)
-            print(self.agent_position)
-            print(x,y)
+            # print(flag)
+            # print(self.agent_position)
+            # print(x,y)
 
     def setup(self,screen,event):
         global fontH3
@@ -505,6 +505,8 @@ class Grid:
 
     def pos_to_index(self,postion):
         return postion[0]*int(self.y)+postion[1]
+    def index_to_pos(self,index):
+        return ((index//int(self.y),index%int(self.y)))
 
 class Search_Agent:
     def __init__(self,grid):
@@ -527,15 +529,17 @@ class Search_Agent:
                 temp_list.append((grid_element.position[0],grid_element.position[1]+1))
         if grid_element.effect == 1 or grid_element.effect == 3:
             pass
-        # print(self.safe_list)
-        # print(self.effect_list)
+        # print("Safe list:",self.safe_list)
+        # print("Effect list:",self.effect_list)
+        # print("Agent converted pose:",self.working_grid.index_to_pos(self.working_grid.agent_index))
+        # print("Agent actual pose:",self.working_grid.agent_position)
         for i in temp_list:
             self.safe_list.append(i)
         return temp_list
 
     def move_to(self,screen,goal):
-        print("goal:",goal)
-        print("current:",self.working_grid.agent_position)
+        # print("goal:",goal)
+        # print("current:",self.working_grid.agent_position)
         if self.working_grid.agent_position[0]-1 == goal[0] and self.working_grid.agent_position[1] == goal[1]:
             direction = 1
         elif self.working_grid.agent_position[0]+1 == goal[0] and self.working_grid.agent_position[1] == goal[1]:
@@ -551,12 +555,10 @@ class Search_Agent:
     def search(self,screen,current_node,*next_depth_nodelist):
         self.traversed_list.add(current_node)
         if self.finished_flag:
-            print("flag")
+            # print("flag")
             return
         else:
-            print("next node list:")
-            for i in next_depth_nodelist:
-                print(i)
+            print("next node list:",next_depth_nodelist)
             if next_depth_nodelist:
                 print("list exist")
                 for i in next_depth_nodelist:
@@ -572,6 +574,8 @@ class Search_Agent:
                     check_list=self.check_neighbours(self.working_grid.grid_comp_list[self.working_grid.pos_to_index(i)])
                     print("neibhours:",check_list)
                     self.search(screen,self.working_grid.agent_position,*check_list)
+                self.move_to(screen,current_node)
+                print("returning")
                 return
             else:
                 print("no list")
