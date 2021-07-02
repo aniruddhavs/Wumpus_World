@@ -133,7 +133,7 @@ class Grid_comp:
         self.sizex = size_x
         self.sizey = size_y
         self.rect = pygame.Rect(0,0,size_x,size_y)
-        self.position = [count_x,count_y]
+        self.position = (count_x,count_y)
         self.content = 0
         self.effect = 0
         global agent_img
@@ -311,7 +311,7 @@ class Grid:
         self.start_button = Button(550,220,80,40,"Start!")
         for _ in range(self.rect.left+2,self.rect.left+380,self.size_x+2):
             count_y = 0
-            for j in range(self.rect.top+2,self.rect.top+380,self.size_y+2):
+            for _ in range(self.rect.top+2,self.rect.top+380,self.size_y+2):
                 square = Grid_comp(count_x,count_y,self.size_x,self.size_y)
                 self.grid_comp_list.append(square)
                 count_y += 1
@@ -491,11 +491,44 @@ class Grid:
                     msg_rect.centerx = 320
                     screen.blit(msg_surf,msg_rect)
 
+    def pos_to_index(self,postion):
+        return postion[0]*int(self.y)+postion[1]
+
 class Search_Agent:
     def __init__(self,grid):
         self.safe_list = []
-        self.tree = {}
+        self.effect_list = {}
         self.working_grid = grid
+        self.finished_flag = False
+    def check_neighbours(self,grid_element=Grid_comp):
+        self.effect_list[self.working_grid.pos_to_index(grid_element.position)]=grid_element.effect
+        temp_list = []
+        if grid_element.effect == 0:
+            if grid_element.position[0] < int(self.working_grid.x) and grid_element.position[0] > 0:
+                temp_list.append((grid_element.position[0]-1,grid_element.position[1]))
+            if grid_element.position[0] < int(self.working_grid.x)-1 and grid_element.position[0] >= 0:
+                temp_list.append((grid_element.position[0]+1,grid_element.position[1]))
+            if grid_element.position[1] < int(self.working_grid.y) and grid_element.position[1] > 0:
+                temp_list.append((grid_element.position[0],grid_element.position[1]-1))
+            if grid_element.position[1] < int(self.working_grid.y)-1 and grid_element.position[1] >= 0:
+                temp_list.append((grid_element.position[0],grid_element.position[1]+1))
+        if grid_element.effect == 1 or grid_element.effect == 3:
+            pass
+        print(self.safe_list)
+        print(self.effect_list)
+        for i in temp_list:
+            self.safe_list.append(i)
+        return temp_list
+    def search(self,current_node,next_depth_nodelist):
+        if self.finished_flag:
+            return
+        else:
+            if next_depth_nodelist:
+                for i in next_depth_nodelist:
+                    check_list=self.check_neighbours(self.working_grid.grid_comp_list[self.working_grid.pos_to_index(i)])
+                    
+            else:
+                return []
 
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
@@ -553,7 +586,8 @@ while setup_flag:
 screen.fill((255,255,255))
 grid.draw(screen,width//2,height//2,show_button=False)
 pygame.display.flip()
-#grid.move(screen,0)
+Agent = Search_Agent(grid)
+Agent.check_neighbours(grid.grid_comp_list[grid.agent_index])
 grid.draw(screen,width//2,height//2,show_button=False)
 pygame.display.flip()
 while True:
