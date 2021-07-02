@@ -565,7 +565,7 @@ class Search_Agent:
                     if i in self.traversed_list:
                         continue
                     self.move_to(screen,i)
-                    if self.working_grid.grid_comp_list[self.working_grid.agent_index].content > 1:
+                    if self.working_grid.grid_comp_list[self.working_grid.agent_index].content == 3:
                         print("done")
                         self.finished_flag = True
                         return
@@ -638,8 +638,23 @@ start_list = Agent.check_neighbours(grid.grid_comp_list[grid.agent_index])
 print("Start list:",start_list)
 grid.draw(screen,width//2,height//2,show_button=False)
 pygame.display.flip()
+Agent.search(screen,grid.agent_position,*start_list)
+mask_surface = pygame.Surface((640,480))
+mask_surface.fill((0,0,0))
+mask_surface.set_alpha(50)
+screen.blit(mask_surface, (0,0))
+if Agent.finished_flag:
+    msg = "Gold Found!!!"
+else:
+    mas = "Couldn't Find Gold"
+msg_surf = fontH.render(msg, True, (0,0,0))
+msg_rect = msg_surf.get_rect()
+msg_rect.centery = height//2
+msg_rect.centerx = width//2
+screen.fill((127,127,127),msg_rect)
+screen.blit(msg_surf,msg_rect)
+pygame.display.flip()
 while True:
-    Agent.search(screen,grid.agent_position,*start_list)
     for event in pygame.event.get(): 
         if event.type==pygame.QUIT:
             pygame.quit() 
