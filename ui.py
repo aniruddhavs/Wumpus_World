@@ -183,7 +183,16 @@ class Grid_comp:
         screen.blit(self.surface, new_rect)
         if self.content == 1 and not draw_agent:
             if self.effect >= 1:
-                screen.blit(self.full_scaled_effects[self.effect], new_rect)
+                if self.effect == 3:
+                    half_rect = pygame.Rect.copy(new_rect)
+                    half_rect.width,half_rect.height = half_rect.width//2,half_rect.height//2
+                    half_rect.top = new_rect.top
+                    half_rect.left = new_rect.left
+                    screen.blit(self.half_scaled_effects[1], half_rect)
+                    half_rect.right = new_rect.right
+                    screen.blit(self.half_scaled_effects[2], half_rect)
+                else:
+                    screen.blit(self.full_scaled_effects[self.effect], new_rect)
         elif self.content >=1:
             if self.effect >= 1 and draw_effects:
                 half_rect = pygame.Rect.copy(new_rect)
@@ -378,7 +387,7 @@ class Grid:
                     self.agent_index += 1
                 elif direction == 3:
                     self.agent_index -= 1
-                self.grid_comp_list[self.agent_index].content = 1
+                self.grid_comp_list[self.agent_index].content += 1
                 self.agent_position = self.grid_comp_list[self.agent_index].position
             print(flag)
             print(self.agent_position)
@@ -500,7 +509,7 @@ class Grid:
 class Search_Agent:
     def __init__(self,grid):
         self.safe_list = []
-        self.traversed_list = []
+        self.traversed_list = set()
         self.effect_list = {}
         self.working_grid = grid
         self.finished_flag = False
@@ -527,18 +536,20 @@ class Search_Agent:
     def move_to(self,screen,goal):
         print("goal:",goal)
         print("current:",self.working_grid.agent_position)
-        if self.working_grid.agent_position[0]-1 == goal[0]:
+        if self.working_grid.agent_position[0]-1 == goal[0] and self.working_grid.agent_position[1] == goal[1]:
             direction = 1
-        elif self.working_grid.agent_position[0]+1 == goal[0]:
+        elif self.working_grid.agent_position[0]+1 == goal[0] and self.working_grid.agent_position[1] == goal[1]:
             direction = 0
-        elif self.working_grid.agent_position[1]-1 == goal[1]:
+        elif self.working_grid.agent_position[1]-1 == goal[1] and self.working_grid.agent_position[0] == goal[0]:
             direction = 3
-        elif self.working_grid.agent_position[1]-1 == goal[1]:
+        elif self.working_grid.agent_position[1]+1 == goal[1] and self.working_grid.agent_position[0] == goal[0]:
             direction = 2
+        else:
+            direction = -1
         self.working_grid.move(screen,direction)
 
     def search(self,screen,current_node,*next_depth_nodelist):
-        self.traversed_list.append(current_node)
+        self.traversed_list.add(current_node)
         if self.finished_flag:
             print("flag")
             return
@@ -550,18 +561,20 @@ class Search_Agent:
                 print("list exist")
                 for i in next_depth_nodelist:
                     print("in ",i)
+                    self.move_to(screen,current_node)
                     if i in self.traversed_list:
                         continue
                     self.move_to(screen,i)
                     if self.working_grid.grid_comp_list[self.working_grid.agent_index].content > 1:
                         print("done")
+                        self.finished_flag = True
                         return
                     check_list=self.check_neighbours(self.working_grid.grid_comp_list[self.working_grid.pos_to_index(i)])
                     print("neibhours:",check_list)
                     self.search(screen,self.working_grid.agent_position,*check_list)
+                return
             else:
                 print("no list")
-                self.move_to(screen,self.working_grid.pos_to_index(current_node))
                 return
 
 fontH.set_bold(True)
