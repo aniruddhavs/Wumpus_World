@@ -332,6 +332,8 @@ class Grid:
             self.start_button.draw(screen)
 
     def move(self,screen,direction):
+        print("Move is called")
+        print(direction)
         print(self.agent_position)
         if self.agent_present:
             x,y = self.grid_comp_list[self.agent_index].rect.left,self.grid_comp_list[self.agent_index].rect.top
@@ -378,6 +380,7 @@ class Grid:
                     self.agent_index -= 1
                 self.grid_comp_list[self.agent_index].content = 1
                 self.agent_position = self.grid_comp_list[self.agent_index].position
+            print(flag)
             print(self.agent_position)
             print(x,y)
 
@@ -497,6 +500,7 @@ class Grid:
 class Search_Agent:
     def __init__(self,grid):
         self.safe_list = []
+        self.traversed_list = []
         self.effect_list = {}
         self.working_grid = grid
         self.finished_flag = False
@@ -514,21 +518,51 @@ class Search_Agent:
                 temp_list.append((grid_element.position[0],grid_element.position[1]+1))
         if grid_element.effect == 1 or grid_element.effect == 3:
             pass
-        print(self.safe_list)
-        print(self.effect_list)
+        # print(self.safe_list)
+        # print(self.effect_list)
         for i in temp_list:
             self.safe_list.append(i)
         return temp_list
-    def search(self,current_node,next_depth_nodelist):
+
+    def move_to(self,screen,goal):
+        print("goal:",goal)
+        print("current:",self.working_grid.agent_position)
+        if self.working_grid.agent_position[0]-1 == goal[0]:
+            direction = 1
+        elif self.working_grid.agent_position[0]+1 == goal[0]:
+            direction = 0
+        elif self.working_grid.agent_position[1]-1 == goal[1]:
+            direction = 3
+        elif self.working_grid.agent_position[1]-1 == goal[1]:
+            direction = 2
+        self.working_grid.move(screen,direction)
+
+    def search(self,screen,current_node,*next_depth_nodelist):
+        self.traversed_list.append(current_node)
         if self.finished_flag:
+            print("flag")
             return
         else:
+            print("next node list:")
+            for i in next_depth_nodelist:
+                print(i)
             if next_depth_nodelist:
+                print("list exist")
                 for i in next_depth_nodelist:
+                    print("in ",i)
+                    if i in self.traversed_list:
+                        continue
+                    self.move_to(screen,i)
+                    if self.working_grid.grid_comp_list[self.working_grid.agent_index].content > 1:
+                        print("done")
+                        return
                     check_list=self.check_neighbours(self.working_grid.grid_comp_list[self.working_grid.pos_to_index(i)])
-                    
+                    print("neibhours:",check_list)
+                    self.search(screen,self.working_grid.agent_position,*check_list)
             else:
-                return []
+                print("no list")
+                self.move_to(screen,self.working_grid.pos_to_index(current_node))
+                return
 
 fontH.set_bold(True)
 Welcome = fontH.render("Wumpus World",True,(0,0,0))
@@ -587,10 +621,12 @@ screen.fill((255,255,255))
 grid.draw(screen,width//2,height//2,show_button=False)
 pygame.display.flip()
 Agent = Search_Agent(grid)
-Agent.check_neighbours(grid.grid_comp_list[grid.agent_index])
+start_list = Agent.check_neighbours(grid.grid_comp_list[grid.agent_index])
+print("Start list:",start_list)
 grid.draw(screen,width//2,height//2,show_button=False)
 pygame.display.flip()
 while True:
+    Agent.search(screen,grid.agent_position,*start_list)
     for event in pygame.event.get(): 
         if event.type==pygame.QUIT:
             pygame.quit() 
