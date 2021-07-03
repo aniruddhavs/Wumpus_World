@@ -515,6 +515,7 @@ class Search_Agent:
         self.effect_list = {}
         self.working_grid = grid
         self.finished_flag = False
+        self.backtrack_flag = False
     def check_neighbours(self,grid_element=Grid_comp):
         self.effect_list[self.working_grid.pos_to_index(grid_element.position)]=grid_element.effect
         temp_list = []
@@ -554,31 +555,43 @@ class Search_Agent:
 
     def search(self,screen,current_node,*next_depth_nodelist):
         self.traversed_list.add(current_node)
+        temp_list = []
+        print("Backtrack Flag:",self.backtrack_flag)
         if self.finished_flag:
             # print("flag")
             return
         else:
-            print("next node list:",next_depth_nodelist)
+            #print("next node list:",next_depth_nodelist)
             if next_depth_nodelist:
-                print("list exist")
+                #print("list exist")
                 for i in next_depth_nodelist:
-                    print("in ",i)
+                    #print("in ",i)
                     self.move_to(screen,current_node)
-                    if i in self.traversed_list:
+                    if i in self.traversed_list and not self.backtrack_flag:
+                        temp_list.append(i)
                         continue
+                    self.backtrack_flag = False
                     self.move_to(screen,i)
                     if self.working_grid.grid_comp_list[self.working_grid.agent_index].content == 3:
                         print("done")
                         self.finished_flag = True
                         return
                     check_list=self.check_neighbours(self.working_grid.grid_comp_list[self.working_grid.pos_to_index(i)])
-                    print("neibhours:",check_list)
+                    # print("neibhours:",check_list)
+                    # print("Agent pos:",self.working_grid.agent_position)
+                    # print("current node:",current_node)
+                    # print("Finish Flag:",self.finished_flag)
                     self.search(screen,self.working_grid.agent_position,*check_list)
-                self.move_to(screen,current_node)
+                    if self.finished_flag:
+                        return
+                #else:
+                self.backtrack_flag = True
+                self.search(screen,self.working_grid.agent_position,*temp_list)
+                print(not self.finished_flag)
                 print("returning")
                 return
             else:
-                print("no list")
+                #print("no list")
                 return
 
 fontH.set_bold(True)
