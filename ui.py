@@ -538,39 +538,62 @@ class Search_Agent:
                 self.safe_list.append((grid_element.position[0],grid_element.position[1]+1))
         if grid_element.effect == 1 or grid_element.effect == 2:
             if 0 < grid_element.position[0] < int(self.working_grid.x) and 0 <= grid_element.position[1] < int(self.working_grid.y)-1 :
-                print(self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1)))
                 try:
-                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1))] != grid_element.effect:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1))] != grid_element.effect and self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1))] in [1,2]:
                         self.safe_list.append((grid_element.position[0]-1,grid_element.position[1]))
                         self.safe_list.append((grid_element.position[0],grid_element.position[1]+1))
                 except:
                     pass
             if 0 < grid_element.position[0] < int(self.working_grid.x) and 0 < grid_element.position[1] < int(self.working_grid.y) :
-                print(self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1)))
                 try:
-                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]-1))] != grid_element.effect:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]-1))] != grid_element.effect and self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]-1))] in [1,2]:
                         self.safe_list.append((grid_element.position[0]-1,grid_element.position[1]))
                         self.safe_list.append((grid_element.position[0],grid_element.position[1]-1))
                 except:
                     pass
             if 0 <= grid_element.position[0] < int(self.working_grid.x)-1 and 0 <= grid_element.position[1] < int(self.working_grid.y)-1 :
-                print(self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1)))
                 try:
-                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]+1,grid_element.position[1]+1))] != grid_element.effect:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]+1,grid_element.position[1]+1))] != grid_element.effect and self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]+1,grid_element.position[1]+1))] in [1,2]:
                         self.safe_list.append((grid_element.position[0]+1,grid_element.position[1]))
                         self.safe_list.append((grid_element.position[0],grid_element.position[1]+1))
                 except:
                     pass
             if 0 <= grid_element.position[0] < int(self.working_grid.x)-1 and 0 < grid_element.position[1] < int(self.working_grid.y) :
-                print(self.working_grid.pos_to_index((grid_element.position[0]+1,grid_element.position[1]-1)))
                 try:
-                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1))] != grid_element.effect:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1))] != grid_element.effect and self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1))] in [1,2]:
                         self.safe_list.append((grid_element.position[0]+1,grid_element.position[1]))
                         self.safe_list.append((grid_element.position[0],grid_element.position[1]-1))
                 except:
                     pass
-        if grid_element.effect == 1 or grid_element.effect == 3:
-            pass
+        if grid_element.effect == 2 or grid_element.effect == 3:
+            if 0 < grid_element.position[0] < int(self.working_grid.x) and 0 <= grid_element.position[1] < int(self.working_grid.y)-1 :
+                try:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1))] == 2:
+                        self.safe_list.append((grid_element.position[0]-1,grid_element.position[1]))
+                        self.safe_list.append((grid_element.position[0],grid_element.position[1]+1))
+                except:
+                    pass
+            if 0 < grid_element.position[0] < int(self.working_grid.x) and 0 < grid_element.position[1] < int(self.working_grid.y) :
+                try:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]-1))] == 2:
+                        self.safe_list.append((grid_element.position[0]-1,grid_element.position[1]))
+                        self.safe_list.append((grid_element.position[0],grid_element.position[1]-1))
+                except:
+                    pass
+            if 0 <= grid_element.position[0] < int(self.working_grid.x)-1 and 0 <= grid_element.position[1] < int(self.working_grid.y)-1 :
+                try:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]+1,grid_element.position[1]+1))] == 2:
+                        self.safe_list.append((grid_element.position[0]+1,grid_element.position[1]))
+                        self.safe_list.append((grid_element.position[0],grid_element.position[1]+1))
+                except:
+                    pass
+            if 0 <= grid_element.position[0] < int(self.working_grid.x)-1 and 0 < grid_element.position[1] < int(self.working_grid.y) :
+                try:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1))] == 2:
+                        self.safe_list.append((grid_element.position[0]+1,grid_element.position[1]))
+                        self.safe_list.append((grid_element.position[0],grid_element.position[1]-1))
+                except:
+                    pass
         final_list=[value for value in temp_list if value in self.safe_list]
         print("Safe list:",self.safe_list)
         print("Effect list",self.effect_list)
