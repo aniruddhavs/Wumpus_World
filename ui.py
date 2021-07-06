@@ -519,24 +519,63 @@ class Search_Agent:
     def check_neighbours(self,grid_element=Grid_comp):
         self.effect_list[self.working_grid.pos_to_index(grid_element.position)]=grid_element.effect
         temp_list = []
+        if 0 < grid_element.position[0] < int(self.working_grid.x):
+            temp_list.append((grid_element.position[0]-1,grid_element.position[1]))
+        if 0 <= grid_element.position[0] < int(self.working_grid.x)-1:
+            temp_list.append((grid_element.position[0]+1,grid_element.position[1]))
+        if 0 < grid_element.position[1] < int(self.working_grid.y):
+            temp_list.append((grid_element.position[0],grid_element.position[1]-1))
+        if 0 <= grid_element.position[1] < int(self.working_grid.y)-1:
+            temp_list.append((grid_element.position[0],grid_element.position[1]+1))
         if grid_element.effect == 0:
-            if grid_element.position[0] < int(self.working_grid.x) and grid_element.position[0] > 0:
-                temp_list.append((grid_element.position[0]-1,grid_element.position[1]))
-            if grid_element.position[0] < int(self.working_grid.x)-1 and grid_element.position[0] >= 0:
-                temp_list.append((grid_element.position[0]+1,grid_element.position[1]))
-            if grid_element.position[1] < int(self.working_grid.y) and grid_element.position[1] > 0:
-                temp_list.append((grid_element.position[0],grid_element.position[1]-1))
-            if grid_element.position[1] < int(self.working_grid.y)-1 and grid_element.position[1] >= 0:
-                temp_list.append((grid_element.position[0],grid_element.position[1]+1))
+            if 0 < grid_element.position[0] < int(self.working_grid.x):
+                self.safe_list.append((grid_element.position[0]-1,grid_element.position[1]))
+            if 0 <= grid_element.position[0] < int(self.working_grid.x)-1:
+                self.safe_list.append((grid_element.position[0]+1,grid_element.position[1]))
+            if 0 < grid_element.position[1] < int(self.working_grid.y):
+                self.safe_list.append((grid_element.position[0],grid_element.position[1]-1))
+            if 0 <= grid_element.position[1] < int(self.working_grid.y)-1:
+                self.safe_list.append((grid_element.position[0],grid_element.position[1]+1))
+        if grid_element.effect == 1 or grid_element.effect == 2:
+            if 0 < grid_element.position[0] < int(self.working_grid.x) and 0 <= grid_element.position[1] < int(self.working_grid.y)-1 :
+                print(self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1)))
+                try:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1))] != grid_element.effect:
+                        self.safe_list.append((grid_element.position[0]-1,grid_element.position[1]))
+                        self.safe_list.append((grid_element.position[0],grid_element.position[1]+1))
+                except:
+                    pass
+            if 0 < grid_element.position[0] < int(self.working_grid.x) and 0 < grid_element.position[1] < int(self.working_grid.y) :
+                print(self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1)))
+                try:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]-1))] != grid_element.effect:
+                        self.safe_list.append((grid_element.position[0]-1,grid_element.position[1]))
+                        self.safe_list.append((grid_element.position[0],grid_element.position[1]-1))
+                except:
+                    pass
+            if 0 <= grid_element.position[0] < int(self.working_grid.x)-1 and 0 <= grid_element.position[1] < int(self.working_grid.y)-1 :
+                print(self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1)))
+                try:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]+1,grid_element.position[1]+1))] != grid_element.effect:
+                        self.safe_list.append((grid_element.position[0]+1,grid_element.position[1]))
+                        self.safe_list.append((grid_element.position[0],grid_element.position[1]+1))
+                except:
+                    pass
+            if 0 <= grid_element.position[0] < int(self.working_grid.x)-1 and 0 < grid_element.position[1] < int(self.working_grid.y) :
+                print(self.working_grid.pos_to_index((grid_element.position[0]+1,grid_element.position[1]-1)))
+                try:
+                    if self.effect_list[self.working_grid.pos_to_index((grid_element.position[0]-1,grid_element.position[1]+1))] != grid_element.effect:
+                        self.safe_list.append((grid_element.position[0]+1,grid_element.position[1]))
+                        self.safe_list.append((grid_element.position[0],grid_element.position[1]-1))
+                except:
+                    pass
         if grid_element.effect == 1 or grid_element.effect == 3:
             pass
-        # print("Safe list:",self.safe_list)
-        # print("Effect list:",self.effect_list)
-        # print("Agent converted pose:",self.working_grid.index_to_pos(self.working_grid.agent_index))
-        # print("Agent actual pose:",self.working_grid.agent_position)
-        for i in temp_list:
-            self.safe_list.append(i)
-        return temp_list
+        final_list=[value for value in temp_list if value in self.safe_list]
+        print("Safe list:",self.safe_list)
+        print("Effect list",self.effect_list)
+        #print(final_list) 
+        return final_list
 
     def move_to(self,screen,goal):
         # print("goal:",goal)
@@ -663,7 +702,7 @@ screen.blit(mask_surface, (0,0))
 if Agent.finished_flag:
     msg = "Gold Found!!!"
 else:
-    mas = "Couldn't Find Gold"
+    msg = "Couldn't Find Gold"
 msg_surf = fontH.render(msg, True, (0,0,0))
 msg_rect = msg_surf.get_rect()
 msg_rect.centery = height//2
